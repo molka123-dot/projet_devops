@@ -1,27 +1,54 @@
 pipeline {
     agent any
+    
+    environment {
+        // Définissez ici les variables d'environnement nécessaires pour votre pipeline
+        JAVA_HOME = tool 'java17'
+    }
+
     stages {
-        stage('Git Checkout') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/rchidana/calcwebapp.git'    
-		            echo "Code Checked-out Successfully!!";
+                // Récupération du code source depuis le référentiel GitHub
+                checkout scm
             }
         }
-        
-        stage('Package') {
+
+        stage('Build') {
             steps {
-                bat 'mvn package'    
-		            echo "Maven Package Goal Executed Successfully!";
+                // Utilisation de Maven pour construire le projet Spring Boot
+                sh 'mvn clean install'
             }
         }
-        stage('SonarQube analysis') {
+
+        stage('Run SonarQube Analysis') {
             steps {
-		// Change this as per your Jenkins Configuration
+                // Exécution de l'analyse SonarQube
                 withSonarQubeEnv('SonarQube_server') {
-                    bat 'mvn package sonar:sonar'
+                    sh 'mvn sonar:sonar'
                 }
             }
         }
+
+        stage('Deploy') {
+            steps {
+                // Déployer votre application (peut être adapté en fonction de votre cas)
+                // Exemple : sh 'mvn deploy'
+                sh 'echo "Déploiement de l\'application"'
+            }
+        }
+    }
+
+    post {
+        success {
+            // Actions à effectuer en cas de succès du pipeline
+            echo 'Le pipeline a réussi!'
+            // Ajoutez d'autres actions en cas de succès
+        }
+        failure {
+            // Actions à effectuer en cas d'échec du pipeline
+            echo 'Le pipeline a échoué!'
+            // Ajoutez d'autres actions en cas d'échec
+        }
+    }
 }
-}
- 
