@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"  # Port Jenkins web UI
+      - "50000:50000"  # Port pour les connexions d'agent
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    depends_on:
+      - sonarqube  # Ajout de dépendance à SonarQube
+
+  sonarqube:
+    image: sonarqube:latest  # Assurez-vous de mettre à jour le tag avec la version souhaitée
+    container_name: sonarqube
+    ports:
+      - "9000:9000"  # Port SonarQube web UI
+      - "9092:9092"  # Port SonarQube scanner
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+
+  nexus:
+    image: sonatype/nexus3:3.30.0  # Assurez-vous de mettre à jour le tag avec la version souhaitée
+    container_name: nexus
+    ports:
+      - "8081:8081"  # Port Nexus Repository Manager web UI
+      - "8888:8888"  # Ajout d'un autre port supplémentaire
+    volumes:
+      - nexus_data:/nexus-data
+
+volumes:
+  jenkins_home:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  sonarqube_temp:
+  nexus_data:
